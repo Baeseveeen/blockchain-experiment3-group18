@@ -1,0 +1,36 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/ZHToken.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0 <0.9.0;\n\ncontract ZHToken {\n    string public name = \"ZHToken\";\n    string public symbol = \"ZH202430552926\";\n    uint8 public decimals = 18;\n    uint256 public totalSupply;\n\n    address public owner;\n\n    modifier onlyOwner() {\n        require(\n            msg.sender == owner,\n            \"ZHToken: caller is not the owner\"\n        );\n        _;\n    }\n\n    mapping(address => uint256) private _balances;\n    mapping(address => mapping(address => uint256)) private _allowances;\n\n    event Transfer(\n        address indexed from,\n        address indexed to,\n        uint256 value\n    );\n\n    event Approval(\n        address indexed owner,\n        address indexed spender,\n        uint256 value\n    );\n\n    constructor() {\n        owner = msg.sender;\n    }\n\n    function balanceOf(\n        address account\n    ) public view returns (uint256) {\n        return _balances[account];\n    }\n\n    function allowance(\n        address _owner,\n        address spender\n    ) public view returns (uint256) {\n        return _allowances[_owner][spender];\n    }\n\n    function transfer(\n        address to,\n        uint256 value\n    ) public returns (bool) {\n        require(to != address(0), \"ZHToken: transfer to zero\");\n        require(\n            _balances[msg.sender] >= value,\n            \"ZHToken: insufficient balance\"\n        );\n\n        _balances[msg.sender] -= value;\n        _balances[to] += value;\n\n        emit Transfer(msg.sender, to, value);\n        return true;\n    }\n\n    function approve(\n        address spender,\n        uint256 value\n    ) public returns (bool) {\n        require(spender != address(0), \"ZHToken: approve zero\");\n\n        _allowances[msg.sender][spender] = value;\n\n        emit Approval(msg.sender, spender, value);\n        return true;\n    }\n\n    function transferFrom(\n        address from,\n        address to,\n        uint256 value\n    ) public returns (bool) {\n        require(to != address(0), \"ZHToken: transfer to zero\");\n        require(\n            _balances[from] >= value,\n            \"ZHToken: insufficient balance\"\n        );\n        require(\n            _allowances[from][msg.sender] >= value,\n            \"ZHToken: allowance exceeded\"\n        );\n\n        _allowances[from][msg.sender] -= value;\n        _balances[from] -= value;\n        _balances[to] += value;\n\n        emit Transfer(from, to, value);\n        return true;\n    }\n\n    function mint(\n        address to,\n        uint256 value\n    ) public onlyOwner {\n        require(to != address(0), \"ZHToken: mint to zero\");\n\n        totalSupply += value;\n        _balances[to] += value;\n\n        emit Transfer(address(0), to, value);\n    }\n\n    function burn(uint256 value) public {\n        require(\n            _balances[msg.sender] >= value,\n            \"ZHToken: insufficient balance\"\n        );\n\n        _balances[msg.sender] -= value;\n        totalSupply -= value;\n\n        emit Transfer(msg.sender, address(0), value);\n    }\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "paris",
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
