@@ -333,7 +333,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 2671705,
+      deployedOnBlock: 2673032,
     },
     ZHToken: {
       address: "0x002bCA1e131eCA7a033EC8c71e32d2E098ae0B71",
@@ -611,7 +611,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 2671704,
+      deployedOnBlock: 2672484,
     },
   },
 } as const;
