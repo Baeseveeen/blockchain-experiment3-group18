@@ -175,7 +175,7 @@ export const useScaffoldEventHistory = <
 
       return data;
     },
-    enabled: enabled && isContractAddressAndClientReady && !isPollingActive, // Disable when polling starts
+    enabled: enabled && isContractAddressAndClientReady && blockNumber !== undefined && !isPollingActive,
     initialPageParam: fromBlockValue,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
       if (!blockNumber || fromBlockValue >= blockNumber) return undefined;

@@ -1,0 +1,174 @@
+"use client";
+
+import type { NextPage } from "next";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
+import { BuyerOrderActions, CreateOrderForm } from "~~/components/escrow";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+
+const STATUS_LABELS = [
+  "Created（待付款）",
+  "Paid（已付款）",
+  "Completed（已完成）",
+  "Refunded（已退款）",
+  "Disputed（争议中）",
+] as const;
+
+function OrderRow({ id, onUpdated }: { id: bigint; onUpdated?: () => void }) {
+  const {
+    data: order,
+    isLoading,
+    error,
+    refetch: refetchOrder,
+  } = useScaffoldReadContract({
+    contractName: "Escrow",
+    functionName: "getOrder",
+    args: [id],
+  });
+
+  if (isLoading) {
+    return (
+      <tr>
+        <td>{id.toString()}</td>
+        <td colSpan={7}>正在读取订单...</td>
+      </tr>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <tr>
+        <td>{id.toString()}</td>
+        <td colSpan={7} className="text-error">
+          读取失败：{error?.message ?? "暂无订单数据"}
+        </td>
+      </tr>
+    );
+  }
+
+  const statusIndex = Number(order.status);
+  const status = STATUS_LABELS[statusIndex] ?? `未知状态（${statusIndex}）`;
+
+  const handleUpdated = () => {
+    void refetchOrder();
+    onUpdated?.();
+  };
+
+  return (
+    <tr>
+      <td>{id.toString()}</td>
+      <td className="max-w-36 break-all">{order.buyer}</td>
+      <td className="max-w-36 break-all">{order.seller}</td>
+      <td>{formatUnits(order.amount, 18)} ZHToken</td>
+      <td>{new Date(Number(order.deadline) * 1000).toLocaleString()}</td>
+      <td>{status}</td>
+      <td>{order.description || "—"}</td>
+      <td>
+        <BuyerOrderActions
+          orderId={id}
+          buyer={order.buyer}
+          amount={order.amount}
+          status={statusIndex}
+          onUpdated={handleUpdated}
+        />
+      </td>
+    </tr>
+  );
+}
+
+const EscrowPage: NextPage = () => {
+  const { address: connectedAddress } = useAccount();
+
+  const {
+    data: arbiterAddress,
+    isLoading: arbiterLoading,
+    error: arbiterError,
+  } = useScaffoldReadContract({
+    contractName: "Escrow",
+    functionName: "arbiter",
+  });
+
+  const {
+    data: orderCount,
+    isLoading: countLoading,
+    error: countError,
+    refetch: refetchOrderCount,
+  } = useScaffoldReadContract({
+    contractName: "Escrow",
+    functionName: "orderCount",
+  });
+
+  const orderIds = Array.from({ length: Number(orderCount ?? 0n) }, (_, index) => BigInt(index)).reverse();
+
+  const refreshOrders = () => {
+    void refetchOrderCount();
+  };
+
+  return (
+    <main className="mx-auto w-full max-w-7xl p-6">
+      <h1 className="mb-6 text-3xl font-bold">Escrow 订单管理</h1>
+
+      <section className="mb-6 rounded-xl bg-base-200 p-5">
+        <h2 className="mb-3 text-xl font-semibold">账户与合约信息</h2>
+
+        <p className="mb-2">
+          <strong>当前钱包：</strong>
+          <span className="break-all">{connectedAddress ?? "请先连接钱包"}</span>
+        </p>
+
+        <p>
+          <strong>仲裁人：</strong>
+          {arbiterLoading ? "正在读取..." : arbiterError ? "读取失败，请检查网络和合约配置" : arbiterAddress}
+        </p>
+      </section>
+
+      <section className="mb-8">
+        <CreateOrderForm onOrderCreated={refreshOrders} />
+      </section>
+
+      <section>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">订单列表（共 {orderCount?.toString() ?? "—"} 笔）</h2>
+
+          <button className="btn btn-primary btn-sm" onClick={refreshOrders} disabled={countLoading}>
+            {countLoading ? "读取中..." : "刷新订单"}
+          </button>
+        </div>
+
+        {countError && <p className="mb-4 text-error">读取订单数量失败：{countError.message}</p>}
+
+        {countLoading && <p className="mb-4">正在读取链上订单数量，请稍候...</p>}
+
+        {!countLoading && !countError && orderIds.length === 0 && (
+          <p className="rounded-xl bg-base-200 p-5">当前合约尚无订单，请确认网络为 POTOS Testnet。</p>
+        )}
+
+        {orderIds.length > 0 && (
+          <div className="overflow-x-auto rounded-xl border border-base-300">
+            <table className="table table-zebra">
+              <thead>
+                <tr>
+                  <th>订单 ID</th>
+                  <th>买家</th>
+                  <th>卖家</th>
+                  <th>金额</th>
+                  <th>截止时间</th>
+                  <th>状态</th>
+                  <th>订单描述</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderIds.map(id => (
+                  <OrderRow key={id.toString()} id={id} onUpdated={refreshOrders} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+};
+
+export default EscrowPage;
