@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   60600: {
     Escrow: {
-      address: "0x46229E5f1006655E3215CCd537dAdC0fd2825F32",
+      address: "0xc4D9C77B0b30d582A7d6A93F6E453945C75a78e0",
       abi: [
         {
           inputs: [
@@ -336,7 +336,7 @@ const deployedContracts = {
       deployedOnBlock: 2671705,
     },
     ZHToken: {
-      address: "0xA7Bcf103A53238F49Ee3e7440e9F3797802709F3",
+      address: "0x002bCA1e131eCA7a033EC8c71e32d2E098ae0B71",
       abi: [
         {
           inputs: [],
