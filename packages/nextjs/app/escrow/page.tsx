@@ -4,7 +4,7 @@ import type { NextPage } from "next";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { BuyerOrderActions, CreateOrderForm } from "~~/components/escrow";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldEventHistory, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const STATUS_LABELS = [
   "Created（待付款）",
@@ -89,19 +89,23 @@ const EscrowPage: NextPage = () => {
   });
 
   const {
-    data: orderCount,
-    isLoading: countLoading,
-    error: countError,
-    refetch: refetchOrderCount,
-  } = useScaffoldReadContract({
+    data: orderCreatedEvents,
+    isLoading: eventsLoading,
+    error: eventsError,
+    refetch: refetchOrderEvents,
+  } = useScaffoldEventHistory({
     contractName: "Escrow",
-    functionName: "orderCount",
+    eventName: "OrderCreated",
+    watch: true,
+    blocksBatchSize: 10,
   });
 
-  const orderIds = Array.from({ length: Number(orderCount ?? 0n) }, (_, index) => BigInt(index)).reverse();
+  const orderIds = Array.from(
+    new Set((orderCreatedEvents ?? []).map(event => event.args.id).filter((id): id is bigint => id !== undefined)),
+  ).reverse();
 
   const refreshOrders = () => {
-    void refetchOrderCount();
+    void refetchOrderEvents();
   };
 
   return (
@@ -128,18 +132,18 @@ const EscrowPage: NextPage = () => {
 
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">订单列表（共 {orderCount?.toString() ?? "—"} 笔）</h2>
+          <h2 className="text-xl font-semibold">订单列表（共 {orderIds.length} 笔）</h2>
 
-          <button className="btn btn-primary btn-sm" onClick={refreshOrders} disabled={countLoading}>
-            {countLoading ? "读取中..." : "刷新订单"}
+          <button className="btn btn-primary btn-sm" onClick={refreshOrders} disabled={eventsLoading}>
+            {eventsLoading ? "读取中..." : "刷新订单"}
           </button>
         </div>
 
-        {countError && <p className="mb-4 text-error">读取订单数量失败：{countError.message}</p>}
+        {eventsError && <p className="mb-4 text-error">读取订单事件失败：{eventsError.message}</p>}
 
-        {countLoading && <p className="mb-4">正在读取链上订单数量，请稍候...</p>}
+        {eventsLoading && <p className="mb-4">正在读取 OrderCreated 历史事件，请稍候...</p>}
 
-        {!countLoading && !countError && orderIds.length === 0 && (
+        {!eventsLoading && !eventsError && orderIds.length === 0 && (
           <p className="rounded-xl bg-base-200 p-5">当前合约尚无订单，请确认网络为 POTOS Testnet。</p>
         )}
 
