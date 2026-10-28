@@ -100,13 +100,34 @@ const EscrowPage: NextPage = () => {
     blocksBatchSize: 10,
   });
 
+  const {
+    data: recentOrderCreatedEvents,
+    isLoading: recentEventsLoading,
+    error: recentEventsError,
+    refetch: refetchRecentOrderEvents,
+  } = useScaffoldEventHistory({
+    contractName: "Escrow",
+    eventName: "OrderCreated",
+    fromBlock: 2715949n,
+    watch: true,
+    blocksBatchSize: 10,
+  });
+
   const orderIds = Array.from(
-    new Set((orderCreatedEvents ?? []).map(event => event.args.id).filter((id): id is bigint => id !== undefined)),
-  ).reverse();
+    new Set(
+      [...(orderCreatedEvents ?? []), ...(recentOrderCreatedEvents ?? [])]
+        .map(event => event.args.id)
+        .filter((id): id is bigint => id !== undefined),
+    ),
+  ).sort((a, b) => (a === b ? 0 : a > b ? -1 : 1));
 
   const refreshOrders = () => {
     void refetchOrderEvents();
+    void refetchRecentOrderEvents();
   };
+
+  const ordersLoading = eventsLoading || recentEventsLoading;
+  const ordersError = eventsError ?? recentEventsError;
 
   return (
     <main className="mx-auto w-full max-w-7xl p-6">
@@ -134,16 +155,16 @@ const EscrowPage: NextPage = () => {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">订单列表（共 {orderIds.length} 笔）</h2>
 
-          <button className="btn btn-primary btn-sm" onClick={refreshOrders} disabled={eventsLoading}>
-            {eventsLoading ? "读取中..." : "刷新订单"}
+          <button className="btn btn-primary btn-sm" onClick={refreshOrders} disabled={ordersLoading}>
+            {ordersLoading ? "读取中..." : "刷新订单"}
           </button>
         </div>
 
-        {eventsError && <p className="mb-4 text-error">读取订单事件失败：{eventsError.message}</p>}
+        {ordersError && <p className="mb-4 text-error">读取订单事件失败：{ordersError.message}</p>}
 
-        {eventsLoading && <p className="mb-4">正在读取 OrderCreated 历史事件，请稍候...</p>}
+        {ordersLoading && <p className="mb-4">正在读取 OrderCreated 历史事件，请稍候...</p>}
 
-        {!eventsLoading && !eventsError && orderIds.length === 0 && (
+        {!ordersLoading && !ordersError && orderIds.length === 0 && (
           <p className="rounded-xl bg-base-200 p-5">当前合约尚无订单，请确认网络为 POTOS Testnet。</p>
         )}
 
