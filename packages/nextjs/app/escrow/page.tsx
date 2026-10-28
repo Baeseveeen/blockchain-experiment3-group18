@@ -67,6 +67,7 @@ function OrderRow({ id, onUpdated }: { id: bigint; onUpdated?: () => void }) {
         <BuyerOrderActions
           orderId={id}
           buyer={order.buyer}
+          seller={order.seller}
           amount={order.amount}
           status={statusIndex}
           onUpdated={handleUpdated}
