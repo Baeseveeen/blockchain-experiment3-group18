@@ -1,0 +1,115 @@
+{
+  "address": "0x9dD5D37C92B4FB658C16f9F77B157F2985b6718d",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "balances",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vaultBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xc933ee7bbee6154d4be6f952b25cfdde97fb6ef24448c25feb10fec1c01429f7",
+  "receipt": {
+    "to": null,
+    "from": "0x6016979Ba1A7bD7aF23923FbA73B9cF40e124C3E",
+    "contractAddress": "0x9dD5D37C92B4FB658C16f9F77B157F2985b6718d",
+    "transactionIndex": 0,
+    "gasUsed": "14083",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xfbb9bb192fe87ee4ffb98ab5a81d5a6fbc800cd6671c75ee10e040d32caacc69",
+    "transactionHash": "0xc933ee7bbee6154d4be6f952b25cfdde97fb6ef24448c25feb10fec1c01429f7",
+    "logs": [],
+    "blockNumber": 2741064,
+    "cumulativeGasUsed": "14083",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "1cc62dbdd701f0cb98655b355ba0ee3a",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"balances\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"deposit\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"vaultBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"withdraw\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"Deliberately vulnerable vault used only for the reentrancy challenge.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/VulnerableVault.sol\":\"VulnerableVault\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/VulnerableVault.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity >=0.8.0 <0.9.0;\\n\\n/// @notice Deliberately vulnerable vault used only for the reentrancy challenge.\\ncontract VulnerableVault {\\n    mapping(address => uint256) public balances;\\n\\n    function deposit() public payable {\\n        require(msg.value > 0, \\\"Vault: deposit must be positive\\\");\\n        balances[msg.sender] += msg.value;\\n    }\\n\\n    function withdraw() public {\\n        uint256 amount = balances[msg.sender];\\n        require(amount > 0, \\\"Vault: nothing to withdraw\\\");\\n\\n        // Vulnerability: the external call happens before the balance is cleared.\\n        (bool ok, ) = msg.sender.call{value: amount}(\\\"\\\");\\n        require(ok, \\\"Vault: send failed\\\");\\n\\n        balances[msg.sender] = 0;\\n    }\\n\\n    function vaultBalance() public view returns (uint256) {\\n        return address(this).balance;\\n    }\\n}\\n\",\"keccak256\":\"0x2b5dfd7333dd14741dc9aef0eedd3b8df8fed77088d983431b9b203e0a5aa4d9\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506102b7806100206000396000f3fe60806040526004361061003f5760003560e01c80630bf6cc081461004457806327e235e3146100655780633ccfd60b14610092578063d0e30db0146100a9575b600080fd5b34801561005057600080fd5b50475b60405190815260200160405180910390f35b34801561007157600080fd5b5061005361008036600461022a565b60006020819052908152604090205481565b34801561009e57600080fd5b506100a76100b1565b005b6100a76101b4565b33600090815260208190526040902054806101135760405162461bcd60e51b815260206004820152601a60248201527f5661756c743a206e6f7468696e6720746f20776974686472617700000000000060448201526064015b60405180910390fd5b604051600090339083908381818185875af1925050503d8060008114610155576040519150601f19603f3d011682016040523d82523d6000602084013e61015a565b606091505b50509050806101a05760405162461bcd60e51b815260206004820152601260248201527115985d5b1d0e881cd95b990819985a5b195960721b604482015260640161010a565b505033600090815260208190526040812055565b600034116102045760405162461bcd60e51b815260206004820152601f60248201527f5661756c743a206465706f736974206d75737420626520706f73697469766500604482015260640161010a565b336000908152602081905260408120805434929061022390849061025a565b9091555050565b60006020828403121561023c57600080fd5b81356001600160a01b038116811461025357600080fd5b9392505050565b8082018082111561027b57634e487b7160e01b600052601160045260246000fd5b9291505056fea2646970667358221220a7e3e37a9ff2426efac688fa8eb07b9f3543a6914dfb976d6a9eacef11eb916964736f6c63430008140033",
+  "deployedBytecode": "0x60806040526004361061003f5760003560e01c80630bf6cc081461004457806327e235e3146100655780633ccfd60b14610092578063d0e30db0146100a9575b600080fd5b34801561005057600080fd5b50475b60405190815260200160405180910390f35b34801561007157600080fd5b5061005361008036600461022a565b60006020819052908152604090205481565b34801561009e57600080fd5b506100a76100b1565b005b6100a76101b4565b33600090815260208190526040902054806101135760405162461bcd60e51b815260206004820152601a60248201527f5661756c743a206e6f7468696e6720746f20776974686472617700000000000060448201526064015b60405180910390fd5b604051600090339083908381818185875af1925050503d8060008114610155576040519150601f19603f3d011682016040523d82523d6000602084013e61015a565b606091505b50509050806101a05760405162461bcd60e51b815260206004820152601260248201527115985d5b1d0e881cd95b990819985a5b195960721b604482015260640161010a565b505033600090815260208190526040812055565b600034116102045760405162461bcd60e51b815260206004820152601f60248201527f5661756c743a206465706f736974206d75737420626520706f73697469766500604482015260640161010a565b336000908152602081905260408120805434929061022390849061025a565b9091555050565b60006020828403121561023c57600080fd5b81356001600160a01b038116811461025357600080fd5b9392505050565b8082018082111561027b57634e487b7160e01b600052601160045260246000fd5b9291505056fea2646970667358221220a7e3e37a9ff2426efac688fa8eb07b9f3543a6914dfb976d6a9eacef11eb916964736f6c63430008140033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "Deliberately vulnerable vault used only for the reentrancy challenge.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 790,
+        "contract": "contracts/VulnerableVault.sol:VulnerableVault",
+        "label": "balances",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

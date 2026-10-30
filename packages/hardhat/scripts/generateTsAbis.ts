@@ -20,10 +20,25 @@ const generatedContractComment = `
 const DEPLOYMENTS_DIR = "./deployments";
 const ARTIFACTS_DIR = "./artifacts";
 
+// Route B reuses the contracts deployed in experiment 3 through Remix rather than
+// hardhat-deploy. Keep their verified POTOS addresses when generating frontend data.
+const contractOverrides: Record<string, Record<string, { address: string; deployedOnBlock: number }>> = {
+  "60600": {
+    Escrow: {
+      address: "0xc4D9C77B0b30d582A7d6A93F6E453945C75a78e0",
+      deployedOnBlock: 2672485,
+    },
+    ZHToken: {
+      address: "0x002bCA1e131eCA7a033EC8c71e32d2E098ae0B71",
+      deployedOnBlock: 2672484,
+    },
+  },
+};
+
 function getDirectories(path: string) {
   return fs
     .readdirSync(path, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
+    .filter(dirent => dirent.isDirectory() && !dirent.name.includes("_backup_"))
     .map(dirent => dirent.name);
 }
 
@@ -97,7 +112,13 @@ function getContractDataFromDeployments() {
         fs.readFileSync(`${DEPLOYMENTS_DIR}/${chainName}/${contractName}.json`).toString(),
       );
       const inheritedFunctions = metadata ? getInheritedFunctions(JSON.parse(metadata).sources, contractName) : {};
-      contracts[contractName] = { address, abi, inheritedFunctions, deployedOnBlock: receipt?.blockNumber };
+      const override = contractOverrides[chainId]?.[contractName];
+      contracts[contractName] = {
+        address: override?.address ?? address,
+        abi,
+        inheritedFunctions,
+        deployedOnBlock: override?.deployedOnBlock ?? receipt?.blockNumber,
+      };
     }
     output[chainId] = contracts;
   }
