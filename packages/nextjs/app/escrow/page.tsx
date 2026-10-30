@@ -90,45 +90,59 @@ const EscrowPage: NextPage = () => {
   });
 
   const {
-    data: orderCreatedEvents,
-    isLoading: eventsLoading,
-    error: eventsError,
-    refetch: refetchOrderEvents,
+    data: initialOrderCreatedEvents,
+    isLoading: initialEventsLoading,
+    error: initialEventsError,
+    refetch: refetchInitialOrderEvents,
   } = useScaffoldEventHistory({
     contractName: "Escrow",
     eventName: "OrderCreated",
-    watch: true,
+    toBlock: 2672600n,
     blocksBatchSize: 10,
   });
 
   const {
-    data: recentOrderCreatedEvents,
-    isLoading: recentEventsLoading,
-    error: recentEventsError,
-    refetch: refetchRecentOrderEvents,
+    data: normalOrderCreatedEvents,
+    isLoading: normalEventsLoading,
+    error: normalEventsError,
+    refetch: refetchNormalOrderEvents,
   } = useScaffoldEventHistory({
     contractName: "Escrow",
     eventName: "OrderCreated",
     fromBlock: 2715949n,
+    toBlock: 2715949n,
+    blocksBatchSize: 10,
+  });
+
+  const {
+    data: activeOrderCreatedEvents,
+    isLoading: activeEventsLoading,
+    error: activeEventsError,
+    refetch: refetchActiveOrderEvents,
+  } = useScaffoldEventHistory({
+    contractName: "Escrow",
+    eventName: "OrderCreated",
+    fromBlock: 2740251n,
     watch: true,
     blocksBatchSize: 10,
   });
 
   const orderIds = Array.from(
     new Set(
-      [...(orderCreatedEvents ?? []), ...(recentOrderCreatedEvents ?? [])]
+      [...(initialOrderCreatedEvents ?? []), ...(normalOrderCreatedEvents ?? []), ...(activeOrderCreatedEvents ?? [])]
         .map(event => event.args.id)
         .filter((id): id is bigint => id !== undefined),
     ),
   ).sort((a, b) => (a === b ? 0 : a > b ? -1 : 1));
 
   const refreshOrders = () => {
-    void refetchOrderEvents();
-    void refetchRecentOrderEvents();
+    void refetchInitialOrderEvents();
+    void refetchNormalOrderEvents();
+    void refetchActiveOrderEvents();
   };
 
-  const ordersLoading = eventsLoading || recentEventsLoading;
-  const ordersError = eventsError ?? recentEventsError;
+  const ordersLoading = initialEventsLoading || normalEventsLoading || activeEventsLoading;
+  const ordersError = initialEventsError ?? normalEventsError ?? activeEventsError;
 
   return (
     <main className="mx-auto w-full max-w-7xl p-6">
